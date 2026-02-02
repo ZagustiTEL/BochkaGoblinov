@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A_Messager - Чат</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e5ddd5;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+        .sidebar {
+            width: 250px;
+            background: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .header { background: #075e54; color: white; padding: 15px; font-weight: bold; }
+        .user-info { padding: 15px; background: #f9f9f9; border-bottom: 1px solid #ddd; }
+        .user-info strong { color: #075e54; }
+        .user-info a { color: #d9534f; font-size: 0.8em; text-decoration: none; margin-left: 10px; }
+        .friends-list { flex-grow: 1; overflow-y: auto; }
+        .friend-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.3s; }
+        .friend-item:hover, .friend-item.active { background: #f0f0f0; }
+
+        .main-chat-area { flex-grow: 1; display: flex; flex-direction: column; }
+        .chat-header { background: #075e54; color: white; padding: 15px; font-weight: bold; }
+        #chat-box { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .m { padding: 8px 12px; border-radius: 8px; max-width: 80%; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
+        .m.me { background: #dcf8c6; align-self: flex-end; }
+        .m.other { background: white; align-self: flex-start; }
+
+        .input-area { background: #f0f0f0; padding: 15px; display: flex; gap: 10px; }
+        #msgInp { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
+        .send-btn { background: #128c7e; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .send-btn:hover { opacity: 0.8; }
+
+        .add-friend-area { padding: 15px; border-top: 1px solid #ddd; background: #fafafa; }
+        .add-friend-area form { display: flex; gap: 5px; }
+        .add-friend-area input { flex-grow: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        .add-friend-area button { padding: 8px 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+        .flash-message {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            padding: 10px;
+            margin: 10px 15px 0 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="header">A_Messager</div>
+        <div class="user-info">
+            Привет, <strong>{{ username }}</strong>!
+            <a href="/logout">Выйти</a>
+        </div>
+
+        <!-- Вывод сообщений об ошибках (flash) -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="friends-list" id="friends-list">
+            {% for friend in friends %}
+                <div class="friend-item" onclick="selectFriend({{ friend.id }}, '{{ friend.username }}')">
+                    {{ friend.username }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="add-friend-area">
+            <form action="/add_friend" method="POST">
+                <input name="friend_username" placeholder="Логин друга" required>
+                <button type="submit">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-chat-area" id="main-chat-area" style="display: none;">
+        <div class="chat-header" id="chat-header">
+            <!-- Имя выбранного друга -->
+        </div>
+        <div id="chat-box">
+             <div style="text-align: center; margin-top: 20px; color: #777;">
+                 🔒 Сообщения защищены. Выберите друга или "Избранное" для начала общения.
+             </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="msgInp" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') send()">
+            <button class="send-btn" onclick="send()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        let currentFriendId = null;
+        let lastMessageCount = 0;
+
+        function selectFriend(friendId, username) {
+            currentFriendId = friendId;
+            document.getElementById('chat-header').innerText = `Чат с ${username}`;
+            document.getElementById('main-chat-area').style.display = 'flex';
+
+            // Управление активным классом
+            document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!currentFriendId) return;
+
+            const r = await fetch(`/api/messages/${currentFriendId}`);
+            const data = await r.json();
+            const messages = data.messages;
+
+            if (messages.length !== lastMessageCount) {
+                const box = document.getElementById('chat-box');
+                box.innerHTML = messages.map(m => `
+                    <div class="m ${m.is_me ? 'me' : 'other'}">
+                        ${m.text}
+                        <small style="color:#999; display: block; text-align: right; margin-top: 4px;">${m.time}</small>
+                    </div>
+                `).join('');
+                box.scrollTop = box.scrollHeight;
+                lastMessageCount = messages.length;
+            }
+        }
+
+        async function send() {
+            if (!currentFriendId) return;
+
+            const inp = document.getElementById('msgInp');
+            if (!inp.value.trim()) return;
+            const text = inp.value;
+            inp.value = '';
+
+            await fetch(`/api/send/${currentFriendId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text: text })
+            });
+            loadMessages();
+        }
+
+        setInterval(loadMessages, 2000);
+    </script>
+</body>
+</html>

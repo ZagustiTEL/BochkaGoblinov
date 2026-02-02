@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A_Messager - Главная</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; padding: 10px; background: #f4f4f4; }
+        .card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 8px; width: 70%; }
+        button { padding: 8px 15px; cursor: pointer; background: #555; color: white; border: none; }
+        .flash { color: red; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Привет, {{ username }}! <a href="/logout" style="font-size: 0.5em;">(выйти)</a></h2>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}<p class="flash">{{ messages[0] }}</p>{% endif %}
+        {% endwith %}
+
+        <form action="/join_room" method="POST">
+            <p>Войти в комнату по коду:</p>
+            <input name="room_code" placeholder="Код (например: A1B2C)" required>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <form action="/create_room" method="POST">
+            <p>Создать новую комнату:</p>
+            <input name="room_name" placeholder="Название комнаты" required>
+            <button type="submit">Создать</button>
+        </form>
+    </div>
+</body>
+</html>
