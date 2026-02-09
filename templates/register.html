@@ -3,126 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
+    <title>Регистрация в Dmido</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
             display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
-            position: relative;
-
-            /* Настройки заднего фона */
-            background-image: url('/static/images/login.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
         }
 
-        /* Затемняющий слой поверх фона для лучшей видимости формы */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: -1;
-        }
-
-        .form-container {
-            /* ИЗМЕНЕНО: Ширина увеличена до 265px */
-            width: 265px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            /* Смещение вниз */
-            transform: translate(-50%, calc(-50% + 50px));
-
-            background: rgba(255, 255, 255, 0.4);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        h2 {
+        .auth-container {
+            width: 260px;
+            padding: 25px 35px;
+            border-radius: 24px;
+            background-color: #333;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             text-align: center;
-            color: #333;
-            margin-top: 0;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+        h1 {
+            color: #00bfff;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
             font-size: 14px;
         }
 
-        button {
+        .input-group {
+            margin-bottom: 20px;
             width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 80%;
+            margin: 0 auto; /
+            padding: 12px 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
+            background-color: #444;
+            color: #fff;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            box-shadow: 0 2px 10px rgba(0, 188, 217, 0.7);
+            outline: none;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 80%;
+            margin: 0 auto;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.3s;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        button:hover {
-            background-color: #218838;
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.7);
         }
 
-        .link {
+        .register-link {
+            margin-top: 20px;
             text-align: center;
-            margin-top: 10px;
+            color: #aaa;
             font-size: 12px;
-            color: #444;
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
         }
 
-        .link a {
-            color: #007bff;
+        .register-link a {
+            color: #00bfff;
             text-decoration: none;
+            font-weight: bold;
         }
 
-        .flash-message {
-            color: #721c24;
-            background: rgba(242, 222, 222, 0.8);
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            text-align: center;
-            font-size: 12px;
+        .register-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Регистрация</h2>
-
-        <!-- Вывод сообщений об ошибках (flash) -->
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash-message">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+    <div class="auth-container">
+        <h1>Регистрация</h1>
+        <p>Создай аккаунт в Dmido (username — только латиница)</p>
 
         <form method="POST">
-            <input type="text" name="username" placeholder="Придумайте логин" required>
-            <input type="password" name="password" placeholder="Придумайте пароль" required>
-            <button type="submit">Создать аккаунт</button>
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <div class="input-group">
+                <label for="nickname">Никнейм (русский/английский)</label>
+                <input type="text" id="nickname" name="nickname" required placeholder="Ваш никнейм">
+            </div>
+            <div class="input-group">
+                <label for="username">Username (@, только латиница)</label>
+                <input type="text" id="username" name="username" required placeholder="Уникальный логин">
+            </div>
+            <div class="input-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required placeholder="Минимум 8 символов">
+            </div>
+            <div class="input-group">
+                <label for="confirm_password">Подтвердите пароль</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Повторите пароль">
+            </div>
+
+            <button type="submit" class="btn-primary">Продолжить</button>
         </form>
-        <div class="link">
-            Уже есть аккаунт? <a href="/login">Войти</a>
+
+        <p style="text-align: center; color: #666; margin-top: 15px;">Создавая аккаунт, вы соглашаетесь с
+            <a href="#" style="color: #00bfff;">условиями использования</a>
+            и
+            <a href="#" style="color: #00bfff;">политикой конфиденциальности</a>
+        </p>
+
+        <div class="login-link" style="margin-top: 20px; text-align: center;">
+            <p>Уже есть аккаунт? <a href="{{ url_for('login') }}" style="color: #00bfff;">Войти</a></p>
         </div>
     </div>
 </body>
