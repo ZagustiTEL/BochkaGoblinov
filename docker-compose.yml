@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    volumes:
+      - ./static/uploads:/app/static/uploads
+    depends_on:
+      - db
+  db:
+    image: sqlite:latest
+    volumes:
+      - ./data1.db:/data/data1.db
