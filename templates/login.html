@@ -3,127 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Вход в Dmido</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
             display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
-            position: relative;
-
-            /* Настройки заднего фона */
-            background-image: url('/static/images/login.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
         }
 
-        /* Затемняющий слой поверх фона для лучшей видимости формы */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: -1;
-        }
-
-        .form-container {
-            /* Ширина 265px */
-            width: 265px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            /* Смещение вниз */
-            transform: translate(-50%, calc(-50% + 50px));
-
-            background: rgba(255, 255, 255, 0.4);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        h2 {
+        .auth-container {
+            width: 260px;
+            padding: 40px;
+            border-radius: 24px;
+            background-color: #333;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             text-align: center;
-            color: #333;
-            margin-top: 0;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+        h1 {
+            color: #00bfff;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
             font-size: 14px;
         }
 
-        button {
+        .input-group {
+            margin-bottom: 20px;
             width: 100%;
-            padding: 10px;
-            background-color: #007bff; /* Цвет кнопки входа синий */
-            color: white;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 80%;
+            margin: 0 auto;
+            padding: 12px 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 12px;
+            background-color: #444;
+            color: #fff;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            box-shadow: 0 2px 10px rgba(0, 188, 217, 0.7);
+            outline: none;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 80%;
+            margin: 0 auto;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.3s;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        button:hover {
-            background-color: #0069d9;
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.7);
         }
 
-        .link {
+        .register-link {
+            margin-top: 20px;
             text-align: center;
-            margin-top: 10px;
+            color: #aaa;
             font-size: 12px;
-            color: #444;
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
         }
 
-        .link a {
-            color: #007bff;
+        .register-link a {
+            color: #00bfff;
             text-decoration: none;
+            font-weight: bold;
         }
 
-        /* Стиль для сообщений flash, если вы их добавите в login.html */
-        .flash-message {
-            color: #721c24;
-            background: rgba(242, 222, 222, 0.8);
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            text-align: center;
-            font-size: 12px;
+        .register-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Авторизация</h2>
-
-        <!-- Вывод сообщений об ошибках (flash) -->
-        <!-- {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash-message">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %} -->
+    <div class="auth-container">
+        <h1>Вход</h1>
+        <p>Dmido — мессенджер нового поколения, у нас не воруют данные!</p>
 
         <form method="POST">
-            <input type="text" name="username" placeholder="Логин" required>
-            <input type="password" name="password" placeholder="Пароль" required>
-            <button type="submit">Войти</button>
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <div class="input-group">
+                <label for="username">USERNAME</label>
+                <input type="text" id="username" name="username" required placeholder="Введите логин">
+            </div>
+            <div class="input-group">
+                <label for="password">ПАРОЛЬ</label>
+                <input type="password" id="password" name="password" required placeholder="Введите пароль">
+            </div>
+
+            <button type="submit" class="btn-primary">Войти</button>
         </form>
-        <div class="link">
-            Нет аккаунта? <a href="/register">Создать</a>
+
+        <div class="register-link">
+            <p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
         </div>
     </div>
 </body>
