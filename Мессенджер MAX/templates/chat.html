@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Чат{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-container" {% if receiver %}data-receiver-id="{{ receiver.id }}"{% endif %}>
+    <!-- Боковая панель -->
+    <div class="friends-sidebar">
+        <div class="sidebar-header">
+            <h3>Диалоги</h3>
+            <div class="online-status">Вы в сети</div>
+        </div>
+        
+        <div class="friends-list">
+            {% for friend in friends %}
+                <a href="{{ url_for('chat_with', receiver_id=friend.id) }}" 
+                   class="friend-item {% if receiver and friend.id == receiver.id %}active{% endif %}">
+                    <div class="friend-avatar">
+                        <div class="avatar-circle">{{ friend.username[0].upper() }}</div>
+                    </div>
+                    <div class="friend-info">
+                        <strong>{{ friend.unique_nickname }}</strong>
+                        <span class="friend-username">{{ friend.username }}</span>
+                        {% if friend.last_message %}
+                            <div class="last-message">
+                                {% if friend.last_message.is_own %}Вы:{% endif %}
+                                {{ friend.last_message.text|truncate(15) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Область чата -->
+    <div class="chat-main">
+        {% if receiver %}
+            <!-- Шапка -->
+            <div class="chat-header">
+                <div class="partner-avatar">
+                    <div class="avatar-circle">{{ receiver.username[0].upper() }}</div>
+                </div>
+                <div class="partner-info">
+                    <h3>{{ receiver.unique_nickname }}</h3>
+                    <span class="partner-username">{{ receiver.username }}</span>
+                </div>
+            </div>
+            
+           <!-- Сообщения -->
+<div class="messages-container" id="messages-container">
+    {% for message in messages %}
+        <div class="message-wrapper {% if message[1] == session.user_id %}own-message{% else %}other-message{% endif %}" 
+             data-message-id="{{ message[0] }}">
+            <div class="message {% if message[1] == session.user_id %}own{% else %}other{% endif %}">
+                {% if message[1] != session.user_id %}
+                    <div class="message-sender">{{ message[7] }}</div>
+                {% endif %}
+                <div class="message-content">{{ message[3] }}</div>
+                <div class="message-time">
+                    {% if message[6] %}
+                        {% if message[6] is string %}
+                            {{ message[6].split(' ')[1][:5] if ' ' in message[6] else message[6] }}
+                        {% else %}
+                            {{ message[6].strftime('%H:%M') }}
+                        {% endif %}
+                    {% endif %}
+                    {% if message[1] == session.user_id %}
+                        <span class="read-status">✓</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 20px; color: #666;">
+            Нет сообщений
+        </div>
+    {% endfor %}
+</div>
+            
+            <!-- Форма ввода -->
+            <form method="POST" action="{{ url_for('send_message') }}" class="message-form" id="message-form">
+                <input type="hidden" name="receiver_id" value="{{ receiver.id }}">
+                <div class="input-group">
+                    <input type="text" 
+                           name="message" 
+                           id="message-input"
+                           placeholder="Сообщение..." 
+                           required>
+                    <button type="submit" class="send-button">
+                        <svg viewBox="0 0 24 24" fill="white">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #666;">
+                Выберите диалог
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if receiver %}
+<script src="{{ url_for('static', filename='chat.js') }}"></script>
+{% endif %}
+{% endblock %}

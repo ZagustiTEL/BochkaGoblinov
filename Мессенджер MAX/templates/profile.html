@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>Ваш профиль</h2>
+        <div class="profile-info">
+            <p><strong>Логин:</strong> {{ user.username }}</p>
+            <p><strong>Уникальный ник:</strong> {{ user.unique_nickname }}</p>
+        </div>
+    </div>
+    
+    <div class="profile-sections">
+        <!-- Секция добавления друзей -->
+        <div class="section search-container">
+            <h3>Добавить друга</h3>
+            <form method="POST" action="{{ url_for('add_friend') }}" class="search-form">
+                <input type="text" name="nickname" placeholder="Введите ник @username" required>
+                <button type="submit" class="btn">Отправить заявку</button>
+            </form>
+            <p><a href="{{ url_for('search_users') }}">Поиск пользователей</a></p>
+        </div>
+        
+        <!-- Секция входящих заявок -->
+        {% if friend_requests %}
+        <div class="section">
+            <h3>Заявки в друзья</h3>
+            <div class="requests-list">
+                {% for request in friend_requests %}
+                    <div class="request-item user-item">
+                        <div class="request-info user-info">
+                            <strong>{{ request.unique_nickname }}</strong> 
+                            <span>({{ request.username }})</span>
+                            <small>{{ request.requested_at }}</small>
+                        </div>
+                        <div class="request-actions">
+                            <a href="{{ url_for('respond_friend_request', request_id=request.id, action='accept') }}" class="btn">Принять</a>
+                            <a href="{{ url_for('respond_friend_request', request_id=request.id, action='reject') }}" class="btn">Отклонить</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Секция списка друзей -->
+        <div class="section">
+            <h3>Мои друзья ({{ friends|length }})</h3>
+            {% if friends %}
+                <div class="friends-list users-list">
+                    {% for friend in friends %}
+                        <div class="friend-item user-item">
+                            <div class="friend-info user-info">
+                                <strong>{{ friend.unique_nickname }}</strong>
+                                <span>({{ friend.username }})</span>
+                                {% if friend.accepted_at %}
+                                    <small>Добавлен: {{ friend.accepted_at }}</small>
+                                {% endif %}
+                                <div>
+                                    {% if friend.status == 'online' %}
+                                        ● В сети
+                                    {% elif friend.status == 'recently' %}
+                                        ● Был(а) недавно
+                                    {% else %}
+                                        ○ Не в сети
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="friend-actions">
+                                <a href="{{ url_for('chat_with', receiver_id=friend.id) }}" class="btn">💬</a>
+                                <a href="{{ url_for('remove_friend', friend_id=friend.id) }}" class="btn" onclick="return confirm('Удалить из друзей?')">✗</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>У вас пока нет друзей</p>
+            {% endif %}
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
