@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Добро пожаловать в Simple Messenger</h1>
+    <p>Простой и удобный мессенджер с уникальными никами</p>
+    
+    {% if not session.user_id %}
+        <div class="auth-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Войти</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">Зарегистрироваться</a>
+        </div>
+    {% else %}
+        <div class="welcome">
+            <p>Привет, {{ session.unique_nickname }}!</p>
+            <a href="{{ url_for('chat') }}" class="btn btn-primary">Начать общение</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="features">
+    <div class="feature">
+        <h3>Уникальные ники</h3>
+        <p>Каждый пользователь получает уникальный ник в формате @username</p>
+    </div>
+    <div class="feature">
+        <h3>Безопасность</h3>
+        <p>Пароли хранятся в зашифрованном виде</p>
+    </div>
+    <div class="feature">
+        <h3>Простота</h3>
+        <p>Интуитивно понятный интерфейс</p>
+    </div>
+</div>
+{% endblock %}
