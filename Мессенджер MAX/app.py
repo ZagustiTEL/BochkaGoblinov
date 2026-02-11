@@ -34,6 +34,11 @@ def allowed_file(filename, file_type='image'):
         return ext in app.config['ALLOWED_STICKER_EXTENSIONS']
     return False
 
+@app.route('/policy')
+def policy():
+    """Страница пользовательского соглашения"""
+    return render_template('pol.html')
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -45,6 +50,11 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        terms = request.form.get('terms')  # Получаем значение чекбокса
+        
+        # Проверяем, принято ли соглашение
+        if not terms:
+            return render_template('register.html', error='Необходимо принять Пользовательское соглашение')
         
         if db.register_user(username, password):
             flash('Регистрация успешна! Теперь вы можете войти.', 'success')
@@ -53,6 +63,10 @@ def register():
             return render_template('register.html', error='Пользователь уже существует')
     
     return render_template('register.html')
+    
+@app.route('/user-agreement')
+def user_agreement():
+    return render_template('user_agreement.html')  # или p1.html
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
