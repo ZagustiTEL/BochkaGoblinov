@@ -7,7 +7,7 @@
     {% if error %}
         <div class="error">{{ error }}</div>
     {% endif %}
-    <form method="POST">
+    <form method="POST" id="register-form">
         <div class="form-group">
             <label for="username">Логин:</label>
             <input type="text" id="username" name="username" required>
@@ -17,8 +17,96 @@
             <label for="password">Пароль:</label>
             <input type="password" id="password" name="password" required>
         </div>
-        <button type="submit">Зарегистрироваться</button>
+        
+        <!-- Блок с галочкой и ссылкой на соглашение -->
+        <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="terms" name="terms" required>
+                <span>Я принимаю условия</span>
+            </label>
+            <a href="{{ url_for('policy') }}" target="_blank" class="policy-link">Пользовательского соглашения</a>
+        </div>
+        
+        <button type="submit" id="register-btn">Зарегистрироваться</button>
     </form>
     <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
 </div>
+
+<style>
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 15px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.policy-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.policy-link:hover {
+    text-decoration: underline;
+}
+
+#register-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('register-form');
+    const checkbox = document.getElementById('terms');
+    const submitBtn = document.getElementById('register-btn');
+    
+    // Функция для проверки состояния чекбокса
+    function checkTerms() {
+        if (!checkbox.checked) {
+            alert('Пожалуйста, примите Пользовательское соглашение');
+            return false;
+        }
+        return true;
+    }
+    
+    // Добавляем обработчик на отправку формы
+    form.addEventListener('submit', function(e) {
+        if (!checkTerms()) {
+            e.preventDefault();
+        }
+    });
+    
+    // Визуальная обратная связь
+    checkbox.addEventListener('change', function() {
+        // Можно добавить/убрать класс для кнопки
+        if (this.checked) {
+            submitBtn.classList.remove('disabled');
+        } else {
+            submitBtn.classList.add('disabled');
+        }
+    });
+});
+</script>
 {% endblock %}
