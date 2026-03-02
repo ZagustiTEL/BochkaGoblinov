@@ -356,6 +356,11 @@ def check_updates():
         'user_status': status
     })
 
+@app.route('/faq')
+def faq():
+    """Страница часто задаваемых вопросов"""
+    return render_template('faq.html')
+
 @app.route('/api/get_last_message_id')
 @login_required
 def get_last_message_id():
