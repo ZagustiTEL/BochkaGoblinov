@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+{% block title %}Часто задаваемые вопросы (FAQ){% endblock %}
+
+{% block styles %}
+<style>
+    .faq-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .faq-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .faq-header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .faq-header p {
+        font-size: 1.2rem;
+        color: #666;
+    }
+
+    .faq-search {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .faq-search-input {
+        width: 100%;
+        max-width: 500px;
+        padding: 12px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .faq-search-input:focus {
+        border-color: #3498db;
+    }
+
+    .faq-categories {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+
+    .category-btn {
+        padding: 8px 20px;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+    .category-btn:hover {
+        background-color: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+
+    .category-btn.active {
+        background-color: #2c3e50;
+        color: white;
+        border-color: #2c3e50;
+    }
+
+    .faq-section {
+        margin-bottom: 40px;
+    }
+
+    .faq-section h2 {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3498db;
+    }
+
+    .faq-item {
+        background-color: white;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .faq-question {
+        padding: 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #2c3e50;
+        transition: background-color 0.3s;
+    }
+
+    .faq-question:hover {
+        background-color: #f8f9fa;
+    }
+
+    .faq-question i {
+        font-size: 1.2rem;
+        color: #3498db;
+        transition: transform 0.3s;
+    }
+
+    .faq-answer {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, padding 0.3s ease;
+        background-color: #f8f9fa;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .faq-item.active .faq-answer {
+        padding: 20px;
+        max-height: 500px;
+    }
+
+    .faq-item.active .faq-question i {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer p {
+        margin: 0 0 10px 0;
+    }
+
+    .faq-answer ul, .faq-answer ol {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+
+    .faq-answer li {
+        margin-bottom: 5px;
+    }
+
+    .faq-footer {
+        text-align: center;
+        margin-top: 50px;
+        padding: 30px;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        border-radius: 8px;
+    }
+
+    .faq-footer h3 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+
+    .faq-footer p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    .faq-footer .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: white;
+        color: #2c3e50;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .faq-footer .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        background-color: white;
+        border-radius: 8px;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .highlight {
+        background-color: #fff3cd;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .faq-container {
+            padding: 20px 15px;
+        }
+
+        .faq-header h1 {
+            font-size: 2rem;
+        }
+
+        .faq-section h2 {
+            font-size: 1.5rem;
+        }
+
+        .faq-question {
+            padding: 15px;
+            font-size: 0.95rem;
+        }
+
+        .faq-answer {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+    <!-- Общие вопросы -->
+    <div class="faq-section" data-category="general">
+        <h2>Общие вопросы</h2>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                Что такое MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>MaxUltra — это современный и безопасный мессенджер, который позволяет обмениваться сообщениями, файлами, изображениями и стикерами с друзьями и близкими. Мы фокусируемся на простоте использования, скорости и защите ваших данных.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Сколько стоит использование MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>MaxUltra полностью бесплатен! Вы можете бесплатно отправлять сообщения, обмениваться файлами, создавать группы и пользоваться всеми функциями мессенджера. В будущем мы планируем добавить премиум-функции, но основная функциональность всегда останется бесплатной.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                На каких платформах доступен MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>На данный момент MaxUltra доступен через веб-версию, которая работает в любом современном браузере. В разработке находятся мобильные приложения для iOS и Android, а также десктопные версии для Windows, macOS и Linux.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Аккаунт и друзья -->
+    <div class="faq-section" data-category="account">
+        <h2>Аккаунт и друзья</h2>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                Как создать аккаунт в MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Создать аккаунт очень просто:</p>
+                <ol>
+                    <li>Нажмите кнопку "Регистрироваться" на главной странице</li>
+                    <li>Придумайте логин и пароль</li>
+                    <li>Ознакомьтесь и примите Пользовательское соглашение</li>
+                    <li>Нажмите "Зарегистрироваться"</li>
+                </ol>
+                <p>После регистрации вы получите уникальный никнейм в формате @ваш_логин, который смогут использовать другие пользователи для добавления вас в друзья.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Как добавить друга в MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Есть несколько способов добавить друга:</p>
+                <ul>
+                    <li><strong>По уникальному нику:</strong> В разделе "Профиль" введите ник друга (например, @username) в поле "Добавить друга" и отправьте заявку</li>
+                    <li><strong>Через поиск:</strong> Нажмите "Поиск пользователей" в профиле, найдите нужного пользователя по нику или логину и отправьте заявку</li>
+                </ul>
+                <p>После того как друг примет вашу заявку, вы сможете начать общение в чате.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Что делать, если я забыл пароль?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Если вы забыли пароль, к сожалению, на данный момент функция восстановления пароля находится в разработке. Мы рекомендуем:</p>
+                <ul>
+                    <li>Запомнить пароль или записать его в надежном месте</li>
+                    <li>В ближайшем будущем мы добавим возможность сброса пароля через email</li>
+                </ul>
+                <p>Приносим извинения за временные неудобства!</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Как удалить друга из списка?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Чтобы удалить пользователя из друзей:</p>
+                <ol>
+                    <li>Перейдите в раздел "Профиль"</li>
+                    <li>Найдите нужного друга в списке "Мои друзья"</li>
+                    <li>Нажмите на кнопку "✗" рядом с именем друга</li>
+                    <li>Подтвердите удаление</li>
+                </ol>
+                <p>После удаления вы не сможете писать этому пользователю, пока снова не отправите заявку в друзья.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Конфиденциальность и безопасность -->
+    <div class="faq-section" data-category="privacy">
+        <h2>Конфиденциальность и безопасность</h2>
+        
+        <div class="faq-item">
+            <div class="faq-question">
+                Насколько безопасны мои данные в MaxUltra?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Безопасность пользователей — наш главный приоритет. MaxUltra использует современные методы защиты данных:</p>
+                <ul>
+                    <li>Все пароли хранятся в зашифрованном виде</li>
+                    <li>Сообщения защищены при передаче</li>
+                    <li>Мы не передаем данные третьим лицам</li>
+                    <li>Регулярно обновляем системы безопасности</li>
+                </ul>
+                <p>Подробнее о защите данных вы можете прочитать в нашем <a href="{{ url_for('policy') }}">Пользовательском соглашении</a>.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Видят ли мои сообщения посторонние?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Нет, ваши сообщения видны только вам и вашему собеседнику. MaxUltra не имеет доступа к содержанию переписки. Мы используем шифрование для защиты сообщений при передаче и хранении. Администрация не читает личные сообщения пользователей.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Что такое Пользовательское соглашение?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Пользовательское соглашение — это документ, который определяет правила использования сервиса MaxUltra, права и обязанности пользователей, а также политику обработки персональных данных. Мы рекомендуем ознакомиться с ним перед началом использования мессенджера. Вы можете прочитать его <a href="{{ url_for('policy') }}">здесь</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Технические вопросы -->
+    <div class="faq-section" data-category="technical">
+        <h2>Технические вопросы</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Почему я не вижу новых сообщений?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>Если вы не видите новых сообщений, попробуйте следующее:</p>
+                <ol>
+                    <li>Обновите страницу (нажмите F5 или Ctrl+R)</li>
+                    <li>Проверьте подключение к интернету</li>
+                    <li>Убедитесь, что вы не заблокировали собеседника</li>
+                    <li>Выйдите из аккаунта и зайдите снова</li>
+                </ol>
+                <p>Если проблема не решается, свяжитесь с поддержкой.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                Как очистить историю сообщений?
+                <i>▼</i>
+            </div>
+            <div class="faq-answer">
+                <p>На данный момент функция очистки истории сообщений находится в разработке. В текущей версии вы можете:</p>
+                <ul>
+                    <li>Удалить друга — это удалит историю переписки с ним</li>
+                    <li>Игнорировать старые сообщения — они не влияют на работу мессенджера</li>
+                </ul>
+                <p>В ближайших обновлениях мы добавим возможность выборочного удаления сообщений и очистки истории чата.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщение при отсутствии результатов поиска -->
+    <div class="no-results" id="noResults" style="display: none;">
+        <p>😕 По вашему запросу ничего не найдено</p>
+        <p>Попробуйте изменить поисковый запрос или выбрать другую категорию</p>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Аккордеон для вопросов
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+            // Закрываем другие открытые элементы (опционально)
+            // Если хотите, чтобы одновременно был открыт только один вопрос, раскомментируйте код ниже
+            /*
+            if (!item.classList.contains('active')) {
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item && otherItem.classList.contains('active')) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+            }
+            */
+            
+            item.classList.toggle('active');
+        });
+    });
+    
+    // Поиск по вопросам
+    const searchInput = document.getElementById('faqSearch');
+    const sections = document.querySelectorAll('.faq-section');
+    const noResults = document.getElementById('noResults');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        let hasResults = false;
+        
+        sections.forEach(section => {
+            const items = section.querySelectorAll('.faq-item');
+            let sectionHasResults = false;
+            
+            items.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    sectionHasResults = true;
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Показываем или скрываем заголовок секции
+            const sectionTitle = section.querySelector('h2');
+            if (sectionHasResults) {
+                section.style.display = 'block';
+                if (sectionTitle) sectionTitle.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        
+        // Показываем сообщение, если нет результатов
+        if (!hasResults && searchTerm !== '') {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+        
+        // Сбрасываем фильтр категорий при поиске
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-category="all"]').classList.add('active');
+    });
+    
+    // Фильтр по категориям
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Убираем активный класс у всех кнопок
+            categoryButtons.forEach(b => b.classList.remove('active'));
+            // Добавляем активный класс текущей кнопке
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            
+            if (category === 'all') {
+                // Показываем все секции и все вопросы
+                sections.forEach(section => {
+                    section.style.display = 'block';
+                    const items = section.querySelectorAll('.faq-item');
+                    items.forEach(item => item.style.display = 'block');
+                });
+                noResults.style.display = 'none';
+            } else {
+                // Показываем только секции выбранной категории
+                sections.forEach(section => {
+                    if (section.dataset.category === category) {
+                        section.style.display = 'block';
+                        const items = section.querySelectorAll('.faq-item');
+                        items.forEach(item => item.style.display = 'block');
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+                noResults.style.display = 'none';
+            }
+            
+            // Очищаем поиск
+            searchInput.value = '';
+        });
+    });
+});
+</script>
+{% endblock %}
