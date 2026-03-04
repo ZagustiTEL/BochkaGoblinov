@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% block title %}Поиск пользователей{% endblock %}
+
+{% block styles %}
+<style>
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .search-header {
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        padding: 40px 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .search-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 10px 0;
+    }
+
+    .search-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .search-form {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 15px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .search-form button {
+        padding: 15px 30px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .search-form button:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .results-header h2 {
+        color: #2c3e50;
+        font-size: 1.5rem;
+    }
+
+    .results-count {
+        background: #f8f9fa;
+        padding: 5px 15px;
+        border-radius: 20px;
+        color: #666;
+    }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .user-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: all 0.3s;
+    }
+
+    .user-card:hover {
+        border-color: #3498db;
+        box-shadow: 0 5px 15px rgba(52,152,219,0.1);
+        transform: translateY(-2px);
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-nickname {
+        color: #3498db;
+        font-size: 0.95rem;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .user-status {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .status-dot.online {
+        background: #27ae60;
+    }
+
+    .status-dot.recently {
+        background: #f39c12;
+    }
+
+    .status-dot.offline {
+        background: #95a5a6;
+    }
+
+    .add-friend-form {
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .btn-add {
+        padding: 8px 16px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-add:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .no-results-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-results h3 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .no-results p {
+        color: #666;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 30px;
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .back-link:hover {
+        color: #3498db;
+    }
+
+    @media (max-width: 768px) {
+        .search-form {
+            flex-direction: column;
+        }
+
+        .users-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .user-card {
+            flex-wrap: wrap;
+        }
+
+        .add-friend-form {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-header">
+        <h1>🔍 Поиск пользователей</h1>
+        <p>Найдите новых друзей по нику или логину</p>
+    </div>
+    
+    <form method="GET" action="{{ url_for('search_users') }}" class="search-form">
+        <input type="text" name="q" value="{{ query }}" 
+               placeholder="Введите ник (@username) или логин..." required>
+        <button type="submit">Найти</button>
+    </form>
+    
+    {% if query %}
+        <div class="results-header">
+            <h2>Результаты поиска</h2>
+            <span class="results-count">Найдено: {{ users|length }}</span>
+        </div>
+        
+        {% if users %}
+            <div class="users-grid">
+                {% for user in users %}
+                    <div class="user-card">
+                        <div class="user-avatar">
+                            {% if user.avatar %}
+                                {% set first_letter = user.unique_nickname[1]|upper if user.unique_nickname and user.unique_nickname|length > 1 else '?' %}
+                                <img src="{{ url_for('uploaded_file', filename=user.avatar) }}" alt="Avatar"
+                                     onerror="this.remove();this.parentElement.innerHTML='{{ first_letter }}';">
+                            {% else %}
+                                {{ user.unique_nickname[1]|upper if user.unique_nickname and user.unique_nickname|length > 1 else '?' }}
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <h3>{{ user.unique_nickname }}</h3>
+                            <span class="user-nickname">{{ user.username }}</span>
+                            <div class="user-status">
+                                <span class="status-dot {{ user.status }}"></span>
+                                {% if user.status == 'online' %}
+                                    В сети
+                                {% elif user.status == 'recently' %}
+                                    Был(а) недавно
+                                {% else %}
+                                    Не в сети
+                                {% endif %}
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ url_for('add_friend') }}" 
+                              class="add-friend-form">
+                            <input type="hidden" name="nickname" value="{{ user.unique_nickname }}">
+                            <button type="submit" class="btn-add">➕ Добавить</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">😕</div>
+                <h3>Пользователи не найдены</h3>
+                <p>Попробуйте изменить поисковый запрос</p>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <div class="back-link">
+        <a href="{{ url_for('profile') }}">← Вернуться в профиль</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block styles %}
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Карточка профиля */
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0 auto 20px;
+        box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+        transition: transform 0.3s;
+        overflow: hidden;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+    }
+
+    .profile-header h2 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .profile-nickname {
+        display: inline-block;
+        background: #f0f7ff;
+        color: #3498db;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        border: 2px solid #3498db;
+        margin-bottom: 20px;
+    }
+
+    /* Статистика - КВАДРАТИКИ ПО ЦЕНТРУ */
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 25px 0;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        min-width: 120px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(52,152,219,0.2);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #3498db;
+        line-height: 1.2;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    /* Информация профиля */
+    .profile-info {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        min-width: 120px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    /* Кнопка редактирования по центру */
+    .profile-actions {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0 20px;
+    }
+
+    .edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+    }
+
+    .edit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(52,152,219,0.4);
+    }
+
+    .edit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .edit-btn i {
+        font-size: 1.3rem;
+    }
+
+    /* Био */
+    .bio-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-left: 4px solid #3498db;
+    }
+
+    .bio-section h4 {
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .bio-text {
+        color: #666;
+        line-height: 1.6;
+        font-size: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .empty-bio {
+        color: #999;
+        font-style: italic;
+    }
+
+    /* Раздел поиска */
+    .search-section {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .search-section h3 {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .search-form button {
+        width: auto;
+        padding: 12px 20px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .search-form button:hover {
+        background: #2980b9;
+    }
+
+    .search-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: color 0.3s;
+    }
+
+    .search-link:hover {
+        color: #3498db;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 15px;
+        }
+
+        .profile-card {
+            padding: 20px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+
+        .profile-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .profile-stats {
+            gap: 10px;
+        }
+
+        .stat-item {
+            min-width: 100px;
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .info-label {
+            min-width: auto;
+        }
+
+        .search-form {
+            flex-direction: column;
+        }
+
+        .edit-btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Основная карточка профиля -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if user.avatar %}
+                    <img src="{{ url_for('uploaded_file', filename=user.avatar) }}" alt="Avatar">
+                {% else %}
+                    {{ user.unique_nickname[1]|upper if user.unique_nickname and user.unique_nickname|length > 1 else '👤' }}
+                {% endif %}
+            </div>
+            <h2>{{ user.username }}</h2>
+            <span class="profile-nickname">{{ user.unique_nickname }}</span>
+        </div>
+
+        <!-- Статистика - КВАДРАТИКИ ПО ЦЕНТРУ -->
+        <div class="profile-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ friends_count|default(0) }}</div>
+                <div class="stat-label">Друзей</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ requests_count|default(0) }}</div>
+                <div class="stat-label">Заявки в друзья</div>
+            </div>
+        </div>
+
+        <!-- Информация о пользователе -->
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">📅 Регистрация:</span>
+                <span class="info-value">{{ user.created_at|default('Не указана') }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🕐 Последний визит:</span>
+                <span class="info-value">
+                    {% if user.status == 'online' %}
+                        <span style="color: #27ae60;">● В сети</span>
+                    {% elif user.status == 'recently' %}
+                        <span style="color: #f39c12;">● Был(а) недавно</span>
+                    {% else %}
+                        <span style="color: #95a5a6;">○ Не в сети</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Био (если есть) -->
+        {% if user.bio %}
+        <div class="bio-section">
+            <h4>📝 О себе</h4>
+            <div class="bio-text">{{ user.bio }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Кнопка редактирования по центру -->
+        <div class="profile-actions">
+            <a href="{{ url_for('profile_edit') }}" class="edit-btn">
+                <span>✏️</span> Редактировать профиль
+            </a>
+        </div>
+    </div>
+
+    <!-- Раздел поиска друзей -->
+    <div class="search-section">
+        <h3>🔍 Поиск пользователей</h3>
+        <form method="GET" action="{{ url_for('search_users') }}" class="search-form">
+            <input type="text" name="q" placeholder="Введите ник (@username) или логин..." required>
+            <button type="submit">Найти</button>
+        </form>
+        <a href="{{ url_for('search_users') }}" class="search-link">Расширенный поиск →</a>
+    </div>
+</div>
+{% endblock %}

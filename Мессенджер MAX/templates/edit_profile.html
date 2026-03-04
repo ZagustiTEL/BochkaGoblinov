@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block styles %}
+<style>
+    .edit-profile-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .edit-profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .edit-profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .edit-profile-header h2 {
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .edit-profile-header p {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    /* Аватар */
+    .avatar-section {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+
+    .current-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        border-radius: 50%;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .current-avatar:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    .current-avatar:hover .avatar-image {
+        transform: scale(1.1);
+    }
+
+    .avatar-upload {
+        display: inline-block;
+        position: relative;
+    }
+
+    .avatar-upload input[type="file"] {
+        display: none;
+    }
+
+    .avatar-upload label {
+        display: inline-block;
+        padding: 12px 25px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+        box-shadow: 0 3px 10px rgba(52,152,219,0.3);
+    }
+
+    .avatar-upload label:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52,152,219,0.4);
+    }
+
+    .avatar-hint {
+        margin-top: 10px;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    /* Форма */
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section h3 {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 5px;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    /* Пароль */
+    .password-hint {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        color: #666;
+        border-left: 4px solid #3498db;
+    }
+
+    .password-hint i {
+        color: #3498db;
+        margin-right: 8px;
+    }
+
+    /* Кнопки */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52,152,219,0.4);
+    }
+
+    .btn-secondary {
+        background: #f8f9fa;
+        color: #2c3e50;
+        border-color: #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+
+    /* Уведомление об удалении */
+    .delete-avatar {
+        margin-top: 10px;
+    }
+
+    .delete-avatar-btn {
+        background: none;
+        border: none;
+        color: #e74c3c;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-decoration: underline;
+    }
+
+    .delete-avatar-btn:hover {
+        color: #c0392b;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .edit-profile-container {
+            padding: 15px;
+        }
+
+        .edit-profile-card {
+            padding: 20px;
+        }
+
+        .edit-profile-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .current-avatar {
+            width: 120px;
+            height: 120px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <div class="edit-profile-card">
+        <div class="edit-profile-header">
+            <h2>⚙️ Редактирование профиля</h2>
+            <p>Настройте ваш профиль по своему вкусу</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('profile_edit') }}" enctype="multipart/form-data">
+            <!-- Аватар -->
+            <div class="avatar-section">
+                <div class="current-avatar" onclick="document.getElementById('avatar').click()">
+                    {% if user.avatar %}
+                        <img src="{{ url_for('uploaded_file', filename=user.avatar) }}" alt="Avatar" class="avatar-image">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ user.unique_nickname[1]|upper if user.unique_nickname and user.unique_nickname|length > 1 else '👤' }}
+                        </div>
+                    {% endif %}
+                    <div class="avatar-overlay">
+                        <span>📷 Изменить</span>
+                    </div>
+                </div>
+                
+                <div class="avatar-upload">
+                    <input type="file" id="avatar" name="avatar" accept="image/png,image/jpeg,image/jpg,image/gif">
+                    <label for="avatar">📷 Выбрать новое фото</label>
+                </div>
+                <div class="avatar-hint">
+                    PNG, JPG, JPEG, GIF до 16MB
+                </div>
+                
+                {% if user.avatar %}
+                <div class="delete-avatar">
+                    <button type="button" class="delete-avatar-btn" onclick="deleteAvatar()">🗑️ Удалить текущее фото</button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3>📝 Основная информация</h3>
+                
+                <div class="form-group">
+                    <label for="username">Логин</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" required>
+                    <small>Ваш уникальный ник <strong>{{ user.unique_nickname }}</strong> останется без изменений</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="display_name">Отображаемое имя</label>
+                    <input type="text" id="display_name" name="display_name" value="{{ user.display_name or '' }}" placeholder="Как вас называть?">
+                    <small>Имя, которое будут видеть другие пользователи</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">О себе</label>
+                    <textarea id="bio" name="bio" placeholder="Расскажите немного о себе...">{{ user.bio or '' }}</textarea>
+                    <small>Краткая информация о вас</small>
+                </div>
+            </div>
+
+            <!-- Смена пароля -->
+            <div class="form-section">
+                <h3>🔐 Смена пароля</h3>
+                
+                <div class="password-hint">
+                    <i>ℹ️</i> Оставьте поля пустыми, если не хотите менять пароль
+                </div>
+
+                <div class="form-group">
+                    <label for="current_password">Текущий пароль</label>
+                    <input type="password" id="current_password" name="current_password" placeholder="Введите текущий пароль">
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password">Новый пароль</label>
+                    <input type="password" id="new_password" name="new_password" placeholder="Введите новый пароль">
+                    <small>Минимум 6 символов</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Подтверждение пароля</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Повторите новый пароль">
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Сохранить изменения</button>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">✗ Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Предпросмотр аватара
+    const avatarInput = document.getElementById('avatar');
+    const currentAvatar = document.querySelector('.current-avatar');
+    
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Проверка размера файла (16MB)
+                if (file.size > 16 * 1024 * 1024) {
+                    alert('Файл слишком большой. Максимальный размер 16MB');
+                    this.value = '';
+                    return;
+                }
+                
+                // Проверка типа файла
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Недопустимый формат. Разрешены: PNG, JPG, JPEG, GIF');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Заменяем содержимое на изображение
+                    currentAvatar.innerHTML = `
+                        <img src="${e.target.result}" alt="Avatar" class="avatar-image">
+                        <div class="avatar-overlay">
+                            <span>📷 Изменить</span>
+                        </div>
+                    `;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Валидация пароля
+    const form = document.querySelector('form');
+    const newPassword = document.getElementById('new_password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const currentPassword = document.getElementById('current_password');
+
+    form.addEventListener('submit', function(e) {
+        if (newPassword.value || confirmPassword.value || currentPassword.value) {
+            if (!currentPassword.value) {
+                e.preventDefault();
+                alert('Введите текущий пароль для смены пароля');
+            } else if (newPassword.value.length < 6 && newPassword.value.length > 0) {
+                e.preventDefault();
+                alert('Новый пароль должен быть не менее 6 символов');
+            } else if (newPassword.value !== confirmPassword.value) {
+                e.preventDefault();
+                alert('Новые пароли не совпадают');
+            }
+        }
+    });
+});
+
+// Функция удаления аватара
+function deleteAvatar() {
+    if (confirm('Удалить текущее фото профиля?')) {
+        const currentAvatar = document.querySelector('.current-avatar');
+        const firstLetter = "{{ user.unique_nickname[1]|upper if user.unique_nickname and user.unique_nickname|length > 1 else '👤' }}";
+        
+        currentAvatar.innerHTML = `
+            <div class="avatar-placeholder">
+                ${firstLetter}
+            </div>
+            <div class="avatar-overlay">
+                <span>📷 Изменить</span>
+            </div>
+        `;
+        
+        // Очищаем input
+        document.getElementById('avatar').value = '';
+        
+        // Получаем форму
+        const form = document.querySelector('form');
+        
+        // Добавляем скрытое поле для отметки удаления
+        let hiddenInput = document.querySelector('input[name="delete_avatar"]');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'delete_avatar';
+            hiddenInput.value = 'true';
+            form.appendChild(hiddenInput);
+        }
+    }
+}
+</script>
+{% endblock %}

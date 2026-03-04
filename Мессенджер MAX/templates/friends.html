@@ -1,0 +1,632 @@
+{% extends "base.html" %}
+{% block title %}Мои друзья{% endblock %}
+
+{% block styles %}
+<style>
+    .friends-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Заголовок */
+    .friends-header {
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        padding: 40px 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .friends-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 10px 0;
+        font-weight: 600;
+    }
+
+    .friends-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .friends-stats {
+        display: flex;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .stat-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 0.95rem;
+        backdrop-filter: blur(5px);
+    }
+
+    /* Раздел заявок */
+    .requests-section {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: 2px solid #f39c12;
+    }
+
+    .requests-section h2 {
+        color: #f39c12;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .requests-section h2 i {
+        font-size: 1.8rem;
+    }
+
+    .requests-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .request-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        gap: 15px;
+        transition: all 0.3s;
+        border: 1px solid #e0e0e0;
+    }
+
+    .request-card:hover {
+        border-color: #f39c12;
+        box-shadow: 0 5px 15px rgba(243,156,18,0.1);
+        transform: translateY(-2px);
+    }
+
+    .request-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .request-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .request-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .request-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+
+    .request-info .username {
+        color: #666;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .request-info .date {
+        color: #999;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .request-actions {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .btn-accept {
+        padding: 8px 16px;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .btn-accept:hover {
+        background: #2ecc71;
+        transform: translateY(-2px);
+    }
+
+    .btn-reject {
+        padding: 8px 16px;
+        background: white;
+        color: #e74c3c;
+        border: 2px solid #e74c3c;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .btn-reject:hover {
+        background: #e74c3c;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .no-requests {
+        text-align: center;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        color: #666;
+        font-style: italic;
+    }
+
+    /* Фильтр */
+    .filters-bar {
+        background: white;
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 30px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    /* Сетка друзей */
+    .friends-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .friend-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .friend-card:hover {
+        border-color: #3498db;
+        box-shadow: 0 10px 30px rgba(52,152,219,0.15);
+        transform: translateY(-5px);
+    }
+
+    .friend-card.online {
+        border-left: 6px solid #27ae60;
+    }
+
+    .friend-card.recently {
+        border-left: 6px solid #f39c12;
+    }
+
+    .friend-card.offline {
+        border-left: 6px solid #95a5a6;
+    }
+
+    .friend-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .friend-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        margin-right: 20px;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .friend-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .friend-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .friend-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.3rem;
+        color: #2c3e50;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .friend-info a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .friend-info a:hover h3 {
+        color: #3498db;
+    }
+
+    .friend-nickname {
+        color: #3498db;
+        font-weight: 500;
+        font-size: 1rem;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .friend-status {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .status-dot.online {
+        background: #27ae60;
+        box-shadow: 0 0 8px #27ae60;
+    }
+
+    .status-dot.recently {
+        background: #f39c12;
+    }
+
+    .status-dot.offline {
+        background: #95a5a6;
+    }
+
+    .friend-card-footer {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-align: center;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .btn-profile {
+        background: #f8f9fa;
+        color: #2c3e50;
+        border-color: #3498db;
+    }
+
+    .btn-profile:hover {
+        background: #3498db;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-chat {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-chat:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+    }
+
+    .btn-remove {
+        background: white;
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-remove:hover {
+        background: #e74c3c;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .no-friends {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .no-friends-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-friends h3 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .no-friends p {
+        color: #666;
+        margin-bottom: 25px;
+        font-size: 1.1rem;
+    }
+
+    .btn-find {
+        display: inline-block;
+        padding: 15px 40px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+    }
+
+    .btn-find:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(52,152,219,0.4);
+    }
+
+    @media (max-width: 768px) {
+        .friends-header {
+            padding: 30px 20px;
+        }
+
+        .friends-header h1 {
+            font-size: 2rem;
+        }
+
+        .friends-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .friend-card-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .friend-avatar {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        .friend-card-footer {
+            flex-direction: column;
+        }
+
+        .request-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .request-actions {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="friends-container">
+    <div class="friends-header">
+        <h1>👥 Мои друзья</h1>
+        <p>Общайтесь с друзьями, делитесь моментами</p>
+        <div class="friends-stats">
+            <span class="stat-badge">Всего друзей: {{ friends|length }}</span>
+            <span class="stat-badge">Онлайн: {{ online_count|default(0) }}</span>
+        </div>
+    </div>
+
+    <!-- Раздел заявок в друзья -->
+    {% if friend_requests and friend_requests|length > 0 %}
+    <div class="requests-section">
+        <h2>
+            <i>📨</i> Входящие заявки ({{ friend_requests|length }})
+        </h2>
+        <div class="requests-list">
+            {% for request in friend_requests %}
+                <div class="request-card">
+                    <div class="request-avatar">
+                        {% if request.avatar %}
+                            <img src="{{ url_for('uploaded_file', filename=request.avatar) }}" alt="Avatar">
+                        {% else %}
+                            {{ request.unique_nickname[1]|upper if request.unique_nickname and request.unique_nickname|length > 1 else '?' }}
+                        {% endif %}
+                    </div>
+                    <div class="request-info">
+                        <h3>{{ request.unique_nickname }}</h3>
+                        <span class="username">{{ request.username }}</span>
+                        <span class="date">📅 {{ request.requested_at }}</span>
+                    </div>
+                    <div class="request-actions">
+                        <a href="{{ url_for('respond_friend_request', request_id=request.id, action='accept') }}" 
+                           class="btn-accept">✓ Принять</a>
+                        <a href="{{ url_for('respond_friend_request', request_id=request.id, action='reject') }}" 
+                           class="btn-reject">✗ Отклонить</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="filters-bar">
+        <div class="search-box">
+            <input type="text" id="friendSearch" placeholder="🔍 Поиск по имени или нику...">
+        </div>
+    </div>
+
+    {% if friends %}
+        <div class="friends-grid" id="friendsGrid">
+            {% for friend in friends %}
+                <div class="friend-card {{ friend.status }}" 
+                     data-name="{{ friend.username|lower }} {{ friend.unique_nickname|lower }}" 
+                     data-status="{{ friend.status }}">
+                    <div class="friend-card-header">
+                        <div class="friend-avatar">
+                            {% if friend.avatar %}
+                                <img src="{{ url_for('uploaded_file', filename=friend.avatar) }}" alt="Avatar">
+                            {% else %}
+                                {{ friend.unique_nickname[1]|upper if friend.unique_nickname and friend.unique_nickname|length > 1 else '?' }}
+                            {% endif %}
+                        </div>
+                        <div class="friend-info">
+                            <a href="{{ url_for('friend_profile', friend_id=friend.id) }}">
+                                <h3>{{ friend.unique_nickname }}</h3>
+                            </a>
+                            <span class="friend-nickname">{{ friend.username }}</span>
+                            <div class="friend-status">
+                                <span class="status-dot {{ friend.status }}"></span>
+                                <span>
+                                    {% if friend.status == 'online' %}
+                                        В сети
+                                    {% elif friend.status == 'recently' %}
+                                        Был(а) недавно
+                                    {% else %}
+                                        Не в сети
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="friend-card-footer">
+                        <a href="{{ url_for('friend_profile', friend_id=friend.id) }}" 
+                           class="btn btn-profile">👤 Профиль</a>
+                        <a href="{{ url_for('chat_with', receiver_id=friend.id) }}" 
+                           class="btn btn-chat">💬 Написать</a>
+                        <a href="{{ url_for('remove_friend', friend_id=friend.id) }}" 
+                           class="btn btn-remove" 
+                           onclick="return confirm('Удалить пользователя {{ friend.unique_nickname }} из друзей?')">✗</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-friends">
+            <div class="no-friends-icon">😔</div>
+            <h3>У вас пока нет друзей</h3>
+            <p>Найдите интересных людей и отправьте им заявку в друзья!</p>
+            <a href="{{ url_for('search_users') }}" class="btn-find">
+                🔍 Найти друзей
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('friendSearch');
+    const friendCards = document.querySelectorAll('.friend-card');
+    const friendsGrid = document.getElementById('friendsGrid');
+
+    function searchFriends() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        friendCards.forEach(card => {
+            const name = card.dataset.name || '';
+            const searchMatch = searchTerm === '' || name.includes(searchTerm);
+            card.style.display = searchMatch ? 'block' : 'none';
+            if (searchMatch) visibleCount++;
+        });
+
+        let noResults = document.querySelector('.no-results-message');
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+            if (!noResults) {
+                noResults = document.createElement('div');
+                noResults.className = 'no-friends no-results-message';
+                noResults.style.gridColumn = '1 / -1';
+                noResults.innerHTML = 
+                    '<div class="no-friends-icon">🔍</div>' +
+                    '<h3>Ничего не найдено</h3>' +
+                    '<p>Пользователь "' + searchTerm + '" не найден</p>';
+                friendsGrid.appendChild(noResults);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
+    }
+
+    searchInput.addEventListener('input', searchFriends);
+});
+</script>
+{% endblock %}

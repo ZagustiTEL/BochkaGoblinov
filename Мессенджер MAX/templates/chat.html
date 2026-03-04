@@ -1,0 +1,1112 @@
+{% extends "base.html" %}
+{% block title %}Чат{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+<style>
+    /* Дополнительные стили для исправления отображения */
+    .chat-container {
+        margin-top: 0;
+    }
+    
+    .last-message {
+        font-size: 0.75em;
+        color: #666;
+        margin-top: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 160px;
+    }
+    
+    .friend-item.active .last-message {
+        color: #e0e0e0;
+    }
+    
+    .no-chat-selected {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 1.2rem;
+        background: #f8f9fa;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+        overflow: hidden;
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .partner-avatar .avatar-circle {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+
+    .friend-avatar .avatar-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    /* ===== СТИЛИ ДЛЯ ШИРОКОГО ВВОДА ===== */
+    .message-form {
+        background-color: white;
+        padding: 10px 15px;
+        border-top: 1px solid #e0e0e0;
+        position: relative;
+        z-index: 5;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: #f0f2f5;
+        border-radius: 30px;
+        padding: 5px;
+        position: relative;
+    }
+
+    .input-group input {
+        flex: 1;
+        padding: 12px 15px;
+        border: none;
+        background: transparent;
+        font-size: 1rem;
+        outline: none;
+        min-height: 45px;
+        color: #000000 !important;
+    }
+
+    .input-group input::placeholder {
+        color: #8e8e8e;
+    }
+
+    .input-group input:focus {
+        color: #000000 !important;
+    }
+
+    /* Кнопки в стиле Telegram */
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: #5f6368;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        font-size: 1.2rem;
+        position: relative;
+    }
+
+    .action-btn:hover {
+        background: rgba(0,0,0,0.05);
+        color: #3498db;
+    }
+
+    .send-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #3498db;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+
+    .send-button:hover {
+        background: #2980b9;
+        transform: scale(1.05);
+    }
+
+    .send-button svg {
+        width: 18px;
+        height: 18px;
+        fill: white;
+    }
+
+    /* ===== ПАНЕЛЬ СТИКЕРОВ ===== */
+    .stickers-panel {
+        display: none;
+        position: absolute;
+        bottom: 70px;
+        left: 10px;
+        width: 320px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        z-index: 1000;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+    }
+
+    .stickers-panel.show {
+        display: block;
+        animation: fadeInUp 0.2s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stickers-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .stickers-header h4 {
+        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .stickers-close {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.2s;
+    }
+
+    .stickers-close:hover {
+        background: #e9ecef;
+        color: #e74c3c;
+    }
+
+    /* ПРОСТАЯ СЕТКА СТИКЕРОВ */
+    .stickers-grid-container {
+        padding: 15px;
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .stickers-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .sticker-item {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 2rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .sticker-item:hover {
+        background: #e9ecef;
+        transform: scale(1.05);
+        border-color: #3498db;
+        box-shadow: 0 3px 8px rgba(52,152,219,0.2);
+    }
+
+    /* ===== СТИЛИ ДЛЯ СТИКЕРОВ В СООБЩЕНИЯХ ===== */
+    .message-sticker {
+        font-size: 3rem !important;
+        line-height: 1;
+        text-align: center;
+        padding: 5px;
+    }
+
+    .own .message-sticker {
+        font-size: 3rem !important;
+    }
+
+    .other .message-sticker {
+        font-size: 3rem !important;
+    }
+
+    /* ===== СТИЛИ ДЛЯ ИЗОБРАЖЕНИЙ ===== */
+    .message-image {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+    }
+
+    .message-image img {
+        max-width: 250px;
+        max-height: 250px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .message-image img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .message-image .image-label {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 3px;
+        text-align: center;
+    }
+
+    .own .message-image .image-label {
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* ===== КОНТЕКСТНОЕ МЕНЮ ===== */
+    .message-context-menu {
+        position: absolute;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        padding: 8px 0;
+        min-width: 180px;
+        z-index: 2000;
+        display: none;
+        border: 1px solid #e0e0e0;
+        animation: fadeIn 0.1s ease-out;
+    }
+
+    .message-context-menu.show {
+        display: block;
+    }
+
+    .context-menu-item {
+        padding: 10px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #2c3e50;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+    .context-menu-item:hover {
+        background: #f0f7ff;
+        color: #3498db;
+    }
+
+    .context-menu-item.delete:hover {
+        background: #fee;
+        color: #e74c3c;
+    }
+
+    .context-menu-item i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Режим редактирования сообщения */
+    .message.edit-mode {
+        background: #fff3cd !important;
+        border: 2px solid #ffc107 !important;
+        transition: all 0.2s;
+    }
+
+    .edit-message-form {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 2000;
+        width: 400px;
+        border: 2px solid #ffc107;
+    }
+
+    .edit-message-form.show {
+        display: block;
+        animation: slideUp 0.2s ease-out;
+    }
+
+    .edit-message-form input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        margin-bottom: 15px;
+        color: #000000;
+    }
+
+    .edit-message-form input:focus {
+        outline: none;
+        border-color: #ffc107;
+    }
+
+    .edit-message-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .edit-message-actions button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .edit-save-btn {
+        background: #ffc107;
+        color: #2c3e50;
+    }
+
+    .edit-save-btn:hover {
+        background: #e0a800;
+    }
+
+    .edit-cancel-btn {
+        background: #f8f9fa;
+        color: #666;
+    }
+
+    .edit-cancel-btn:hover {
+        background: #e9ecef;
+    }
+
+    /* Удаленные сообщения */
+    .message-wrapper.deleted {
+        display: none !important;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -40%);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    /* Индикатор загрузки */
+    .upload-indicator {
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: white;
+        padding: 10px 18px;
+        border-radius: 40px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        display: none;
+        align-items: center;
+        gap: 8px;
+        z-index: 1000;
+        font-size: 0.9rem;
+    }
+
+    .upload-indicator.show {
+        display: flex;
+    }
+
+    .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Предпросмотр изображения */
+    .image-preview {
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 1000;
+    }
+
+    .image-preview.show {
+        display: flex;
+    }
+
+    .image-preview img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .image-preview-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .image-preview-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .image-preview-btn.send {
+        background: #3498db;
+        color: white;
+    }
+
+    .image-preview-btn.send:hover {
+        background: #2980b9;
+    }
+
+    .image-preview-btn.cancel {
+        background: #f0f2f5;
+        color: #e74c3c;
+    }
+
+    .image-preview-btn.cancel:hover {
+        background: #e4e6e9;
+    }
+
+    /* Текстовые сообщения */
+    .message-content {
+        color: inherit;
+    }
+
+    .own .message-content {
+        color: white;
+    }
+
+    .other .message-content {
+        color: #2c3e50;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .stickers-panel {
+            width: 280px;
+            left: 5px;
+            bottom: 65px;
+        }
+
+        .stickers-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .sticker-item {
+            font-size: 1.8rem;
+        }
+
+        .message-sticker {
+            font-size: 2.5rem !important;
+        }
+
+        .input-group input {
+            padding: 10px 12px;
+            min-height: 40px;
+            color: #000000 !important;
+        }
+
+        .action-btn,
+        .send-button {
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
+        }
+
+        .message-image img {
+            max-width: 180px;
+            max-height: 180px;
+        }
+
+        .edit-message-form {
+            width: 90%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container" {% if receiver %}data-receiver-id="{{ receiver.id }}"{% endif %}>
+    <!-- Боковая панель с диалогами -->
+    <div class="friends-sidebar">
+        <div class="sidebar-header">
+            <h3>Диалоги</h3>
+            <div class="online-status">● Вы в сети</div>
+        </div>
+        
+        <div class="friends-list">
+            {% for friend in friends %}
+                <a href="{{ url_for('chat_with', receiver_id=friend.id) }}" 
+                   class="friend-item {% if receiver and friend.id == receiver.id %}active{% endif %}">
+                    <div class="friend-avatar">
+                        <div class="avatar-circle">
+                            {% if friend.avatar %}
+                                <img src="{{ url_for('uploaded_file', filename=friend.avatar) }}" alt="Avatar">
+                            {% else %}
+                                {{ friend.unique_nickname[1]|upper if friend.unique_nickname and friend.unique_nickname|length > 1 else '?' }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-main">
+                            <strong>{{ friend.unique_nickname }}</strong>
+                        </div>
+                        <span class="friend-username">{{ friend.username }}</span>
+                        {% if friend.last_message %}
+                            <div class="last-message">
+                                {% if friend.last_message.is_own %}<span style="opacity: 0.7;">Вы:</span>{% endif %}
+                                {% if friend.last_message.text and friend.last_message.text.startswith('sticker:') %}
+                                    🎨 Стикер
+                                {% elif friend.last_message.text == 'Изображение' %}
+                                    📷 Изображение
+                                {% else %}
+                                    {{ friend.last_message.text|truncate(20) }}
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="last-message" style="opacity: 0.5;">Нет сообщений</div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% else %}
+                <div style="text-align: center; padding: 20px; color: #666;">
+                    <p>😔 У вас пока нет диалогов</p>
+                    <p style="font-size: 0.9rem;">Добавьте друзей, чтобы начать общение</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Область чата -->
+    <div class="chat-main">
+        {% if receiver %}
+            <!-- Шапка чата с информацией о собеседнике -->
+            <div class="chat-header">
+                <div class="partner-avatar">
+                    <div class="avatar-circle">
+                        {% if receiver.avatar %}
+                            <img src="{{ url_for('uploaded_file', filename=receiver.avatar) }}" alt="Avatar">
+                        {% else %}
+                            {{ receiver.unique_nickname[1]|upper if receiver.unique_nickname and receiver.unique_nickname|length > 1 else '?' }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="partner-info">
+                    <h3>{{ receiver.unique_nickname }}</h3>
+                    <span class="partner-username">{{ receiver.username }}</span>
+                </div>
+            </div>
+            
+            <!-- Сообщения -->
+            <div class="messages-container" id="messages-container">
+                {% for message in messages %}
+                    <div class="message-wrapper {% if message[1] == session.user_id %}own-message{% else %}other-message{% endif %}" 
+                         data-message-id="{{ message[0] }}"
+                         data-message-type="{{ message[4] }}"
+                         data-message-content="{{ message[3] }}"
+                         data-message-file="{{ message[5] if message[5] else '' }}">
+                        <div class="message {% if message[1] == session.user_id %}own{% else %}other{% endif %}">
+                            {% if message[1] != session.user_id %}
+                                <div class="message-sender">{{ message[7] }}</div>
+                            {% endif %}
+                            <div class="message-content">
+                                {% if message[4] == 'image' and message[5] %}
+                                    <div class="message-image">
+                                        <img src="{{ url_for('uploaded_file', filename=message[5]) }}" 
+                                             alt="Изображение" 
+                                             onclick="window.open(this.src, '_blank')">
+                                        <div class="image-label">📷 Изображение</div>
+                                    </div>
+                                {% elif message[4] == 'sticker' %}
+                                    <div class="message-sticker">{{ message[3].replace('sticker:', '') }}</div>
+                                {% else %}
+                                    {{ message[3] }}
+                                {% endif %}
+                            </div>
+                            <div class="message-time">
+                                {% if message[6] %}
+                                    {% if message[6] is string %}
+                                        {{ message[6].split(' ')[1][:5] if ' ' in message[6] else message[6] }}
+                                    {% else %}
+                                        {{ message[6].strftime('%H:%M') }}
+                                    {% endif %}
+                                {% endif %}
+                                {% if message[1] == session.user_id %}
+                                    <span class="read-status">✓</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 40px 20px; color: #666;" id="no-messages-placeholder">
+                        <p style="font-size: 3rem; margin-bottom: 20px;">💬</p>
+                        <p style="font-size: 1.2rem;">Нет сообщений</p>
+                        <p style="font-size: 0.9rem; opacity: 0.7;">
+                            Напишите что-нибудь, чтобы начать общение
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Контекстное меню для сообщений -->
+            <div class="message-context-menu" id="messageContextMenu">
+                <div class="context-menu-item edit" id="editMessageBtn">
+                    <i>✏️</i> Редактировать
+                </div>
+                <div class="context-menu-item delete" id="deleteMessageBtn">
+                    <i>🗑️</i> Удалить
+                </div>
+            </div>
+
+            <!-- Форма редактирования сообщения -->
+            <div class="edit-message-form" id="editMessageForm">
+                <input type="text" id="editMessageInput" placeholder="Введите новый текст..." value="">
+                <div class="edit-message-actions">
+                    <button class="edit-save-btn" id="saveEditBtn">Сохранить</button>
+                    <button class="edit-cancel-btn" id="cancelEditBtn">Отмена</button>
+                </div>
+            </div>
+            
+            <!-- Индикатор загрузки -->
+            <div class="upload-indicator" id="uploadIndicator">
+                <div class="spinner"></div>
+                <span>Отправка...</span>
+            </div>
+            
+            <!-- Предпросмотр изображения -->
+            <div class="image-preview" id="imagePreview">
+                <img src="" alt="Preview" id="previewImage">
+                <div class="image-preview-actions">
+                    <button class="image-preview-btn send" id="confirmImage" title="Отправить">✓</button>
+                    <button class="image-preview-btn cancel" id="cancelImage" title="Отмена">✗</button>
+                </div>
+            </div>
+            
+            <!-- Форма отправки сообщения -->
+            <form method="POST" action="{{ url_for('send_message') }}" class="message-form" id="message-form" enctype="multipart/form-data">
+                <input type="hidden" name="receiver_id" value="{{ receiver.id }}">
+                <input type="hidden" name="sticker_id" id="stickerInput" value="">
+                <div class="input-group" style="position: relative;">
+                    <!-- Кнопка стикеров -->
+                    <button type="button" class="action-btn" id="stickerToggle" title="Стикеры">
+                        😊
+                    </button>
+                    
+                    <!-- ПАНЕЛЬ СТИКЕРОВ -->
+                    <div class="stickers-panel" id="stickersPanel">
+                        <div class="stickers-header">
+                            <h4>Стикеры</h4>
+                            <button class="stickers-close" id="closeStickers">✕</button>
+                        </div>
+                        
+                        <div class="stickers-grid-container">
+                            <div class="stickers-grid" id="stickersGrid">
+                                {% for sticker in stickers %}
+                                    <div class="sticker-item" 
+                                         data-id="{{ sticker.id }}" 
+                                         data-emoji="{{ sticker.emoji }}"
+                                         title="{{ sticker.name }}">
+                                        {{ sticker.emoji }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка изображения -->
+                    <button type="button" class="action-btn" id="imageButton" title="Прикрепить изображение">
+                        📷
+                    </button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    
+                    <!-- Поле ввода -->
+                    <input type="text" 
+                           name="message" 
+                           id="message-input"
+                           placeholder="Напишите сообщение..." 
+                           autocomplete="off"
+                           style="color: #000000;">
+                    
+                    <!-- Кнопка отправки -->
+                    <button type="submit" class="send-button" id="sendButton">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            
+        {% else %}
+            <!-- Сообщение когда не выбран диалог -->
+            <div class="no-chat-selected">
+                <div style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">💭</div>
+                    <h2 style="color: #2c3e50; margin-bottom: 10px;">
+                        Выберите диалог
+                    </h2>
+                    <p style="color: #666;">
+                        Начните общение с другом из списка слева
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+    
+    // Получаем ID получателя из data-атрибута
+    var chatContainer = document.querySelector('.chat-container');
+    var receiverId = chatContainer ? parseInt(chatContainer.dataset.receiverId) : 0;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var messagesContainer = document.getElementById('messages-container');
+        
+        // Скролл вниз при загрузке
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Фокус на поле ввода
+        var messageInput = document.getElementById('message-input');
+        if (messageInput) {
+            messageInput.focus();
+        }
+
+        // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
+        var imageButton = document.getElementById('imageButton');
+        var imageInput = document.getElementById('imageInput');
+        var imagePreview = document.getElementById('imagePreview');
+        var previewImage = document.getElementById('previewImage');
+        var confirmImage = document.getElementById('confirmImage');
+        var cancelImage = document.getElementById('cancelImage');
+        var uploadIndicator = document.getElementById('uploadIndicator');
+        var sendButton = document.getElementById('sendButton');
+        var messageForm = document.getElementById('message-form');
+
+        var selectedImageFile = null;
+
+        if (imageButton) {
+            imageButton.addEventListener('click', function() {
+                imageInput.click();
+            });
+        }
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    if (file.size > 16 * 1024 * 1024) {
+                        alert('Файл слишком большой. Максимальный размер 16MB');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    if (!file.type.startsWith('image/')) {
+                        alert('Пожалуйста, выберите изображение');
+                        this.value = '';
+                        return;
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.classList.add('show');
+                        selectedImageFile = file;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (confirmImage) {
+            confirmImage.addEventListener('click', function() {
+                if (!selectedImageFile) return;
+
+                var formData = new FormData();
+                formData.append('image', selectedImageFile);
+                formData.append('receiver_id', receiverId);
+
+                uploadIndicator.classList.add('show');
+                imagePreview.classList.remove('show');
+                sendButton.disabled = true;
+
+                fetch('/upload_chat_image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        var now = new Date();
+                        var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        
+                        var messageWrapper = document.createElement('div');
+                        messageWrapper.className = 'message-wrapper own-message';
+                        
+                        messageWrapper.innerHTML = 
+                            '<div class="message own">' +
+                            '<div class="message-content">' +
+                            '<div class="message-image">' +
+                            '<img src="/uploads/' + data.file_path + '" alt="Изображение" onclick="window.open(this.src, \'_blank\')">' +
+                            '<div class="image-label">📷 Изображение</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '<div class="message-time">' + timeStr + '<span class="read-status">✓</span></div>' +
+                            '</div>';
+                        
+                        var placeholder = document.getElementById('no-messages-placeholder');
+                        if (placeholder) {
+                            placeholder.remove();
+                        }
+                        
+                        messagesContainer.appendChild(messageWrapper);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        
+                    } else {
+                        alert('Ошибка при отправке изображения');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                    alert('Ошибка при отправке изображения');
+                })
+                .finally(function() {
+                    uploadIndicator.classList.remove('show');
+                    sendButton.disabled = false;
+                    imageInput.value = '';
+                    selectedImageFile = null;
+                });
+            });
+        }
+
+        if (cancelImage) {
+            cancelImage.addEventListener('click', function() {
+                imagePreview.classList.remove('show');
+                imageInput.value = '';
+                selectedImageFile = null;
+            });
+        }
+
+        // ===== СТИКЕРЫ =====
+        var stickerToggle = document.getElementById('stickerToggle');
+        var stickersPanel = document.getElementById('stickersPanel');
+        var closeStickers = document.getElementById('closeStickers');
+        var stickerItems = document.querySelectorAll('.sticker-item');
+        var stickerInput = document.getElementById('stickerInput');
+
+        if (stickerToggle) {
+            stickerToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                stickersPanel.classList.toggle('show');
+            });
+        }
+
+        if (closeStickers) {
+            closeStickers.addEventListener('click', function() {
+                stickersPanel.classList.remove('show');
+            });
+        }
+
+        for (var i = 0; i < stickerItems.length; i++) {
+            (function(index) {
+                var item = stickerItems[index];
+                item.addEventListener('click', function() {
+                    var stickerId = this.dataset.id;
+                    var emoji = this.dataset.emoji;
+                    
+                    var formData = new FormData(messageForm);
+                    formData.set('sticker_id', stickerId);
+                    formData.set('message', '');
+                    
+                    fetch('/send_message', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            var now = new Date();
+                            var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            
+                            var messageWrapper = document.createElement('div');
+                            messageWrapper.className = 'message-wrapper own-message';
+                            
+                            messageWrapper.innerHTML = 
+                                '<div class="message own">' +
+                                '<div class="message-content">' +
+                                '<div class="message-sticker">' + emoji + '</div>' +
+                                '</div>' +
+                                '<div class="message-time">' + timeStr + '<span class="read-status">✓</span></div>' +
+                                '</div>';
+                            
+                            var placeholder = document.getElementById('no-messages-placeholder');
+                            if (placeholder) {
+                                placeholder.remove();
+                            }
+                            
+                            messagesContainer.appendChild(messageWrapper);
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                    });
+                    
+                    stickersPanel.classList.remove('show');
+                });
+            })(i);
+        }
+
+        // Закрытие панелей при клике вне
+        document.addEventListener('click', function(e) {
+            if (stickersPanel && !stickersPanel.contains(e.target) && !stickerToggle.contains(e.target)) {
+                stickersPanel.classList.remove('show');
+            }
+            
+            if (imagePreview && !imagePreview.contains(e.target) && e.target !== imageButton) {
+                imagePreview.classList.remove('show');
+                imageInput.value = '';
+                selectedImageFile = null;
+            }
+        });
+
+        // Перехватываем отправку обычной формы для текстовых сообщений
+        if (messageForm) {
+            messageForm.addEventListener('submit', function(e) {
+                var messageInput = document.getElementById('message-input');
+                
+                if (selectedImageFile) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                if (messageInput && messageInput.value.trim() && !selectedImageFile) {
+                    e.preventDefault();
+                    
+                    var formData = new FormData(messageForm);
+                    
+                    fetch('/send_message', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            var now = new Date();
+                            var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            
+                            var messageWrapper = document.createElement('div');
+                            messageWrapper.className = 'message-wrapper own-message';
+                            
+                            messageWrapper.innerHTML = 
+                                '<div class="message own">' +
+                                '<div class="message-content">' + messageInput.value + '</div>' +
+                                '<div class="message-time">' + timeStr + '<span class="read-status">✓</span></div>' +
+                                '</div>';
+                            
+                            var placeholder = document.getElementById('no-messages-placeholder');
+                            if (placeholder) {
+                                placeholder.remove();
+                            }
+                            
+                            messagesContainer.appendChild(messageWrapper);
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            
+                            messageInput.value = '';
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+    });
+})();
+</script>
+{% endblock %}
