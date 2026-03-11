@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Скачать{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="section-title">Скачать MaxUltra</h1>
+    
+    <div class="download-section">
+        <p style="font-size: 18px; color: #666; margin-bottom: 40px;">Выберите вашу платформу</p>
+        
+        <div class="download-cards">
+            <a href="#" class="download-card">
+                <div class="download-icon">📱</div>
+                <h3>iOS</h3>
+                <p>Для iPhone и iPad</p>
+                <small style="color: #999;">Скоро</small>
+            </a>
+            
+            <a href="#" class="download-card">
+                <div class="download-icon">🤖</div>
+                <h3>Android</h3>
+                <p>Для телефонов и планшетов</p>
+                <small style="color: #999;">Скоро</small>
+            </a>
+            
+            <a href="#" class="download-card">
+                <div class="download-icon">💻</div>
+                <h3>Windows</h3>
+                <p>Для компьютеров на Windows</p>
+                <small style="color: #999;">Скоро</small>
+            </a>
+            
+            <a href="#" class="download-card">
+                <div class="download-icon">🍎</div>
+                <h3>macOS</h3>
+                <p>Для Mac компьютеров</p>
+                <small style="color: #999;">Скоро</small>
+            </a>
+        </div>
+        
+        <div style="margin-top: 60px; padding: 40px; background: #f8f9fa; border-radius: 20px;">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">🌐 Веб-версия</h2>
+            <p style="color: #666; margin-bottom: 30px;">Уже сейчас вы можете пользоваться MaxUltra через браузер на любом устройстве</p>
+            <a href="http://ваш-сайт:5000" class="btn btn-blue" style="display: inline-block;">Перейти в веб-версию</a>
+        </div>
+        
+        <div style="margin-top: 40px; color: #999;">
+            <p>⚠️ Мобильные и десктопные приложения находятся в разработке. Скоро они появятся!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

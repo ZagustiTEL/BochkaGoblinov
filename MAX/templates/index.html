@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Общайся свободно с MaxUltra</h1>
+    <p>Бесплатный, безопасный и очень простой мессенджер. Никакой рекламы, только общение с близкими.</p>
+    <div class="hero-buttons">
+        <a href="{{ url_for('download') }}" class="btn btn-primary">Скачать приложение</a>
+        <a href="{{ url_for('features') }}" class="btn btn-outline">Узнать больше</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="section-title">Почему выбирают MaxUltra</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Безопасно</h3>
+            <p>Все сообщения шифруются. Только вы и ваш собеседник видите переписку.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Быстро</h3>
+            <p>Мгновенная доставка сообщений. Работает на любом устройстве.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">😊</div>
+            <h3>Просто</h3>
+            <p>Интуитивно понятный интерфейс. Разберется даже ребенок.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Стикеры</h3>
+            <p>Множество стикеров и эмодзи, чтобы выразить эмоции.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📷</div>
+            <h3>Фото</h3>
+            <p>Отправляйте изображения и делитесь моментами.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Друзья</h3>
+            <p>Легко добавляйте друзей по уникальному нику.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="text-align: center;">
+    <h2 class="section-title">Готовы начать?</h2>
+    <p style="font-size: 18px; color: #666; margin-bottom: 30px;">Присоединяйтесь к тысячам пользователей уже сегодня</p>
+    <a href="{{ url_for('download') }}" class="btn btn-blue" style="padding: 15px 60px;">Скачать сейчас</a>
+</div>
+{% endblock %}

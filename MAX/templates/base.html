@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxUltra - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">MaxUltra</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Главная</a>
+                <a href="{{ url_for('features') }}" {% if request.endpoint == 'features' %}class="active"{% endif %}>Возможности</a>
+                <a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>О нас</a>
+                <a href="{{ url_for('download') }}" {% if request.endpoint == 'download' %}class="active"{% endif %}>Скачать</a>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>MaxUltra</h3>
+                <p>Простой и безопасный мессенджер для всех</p>
+            </div>
+            <div class="footer-section">
+                <h3>Навигация</h3>
+                <a href="{{ url_for('index') }}">Главная</a>
+                <a href="{{ url_for('features') }}">Возможности</a>
+                <a href="{{ url_for('about') }}">О нас</a>
+                <a href="{{ url_for('download') }}">Скачать</a>
+            </div>
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>Email: info@maxultra.ru</p>
+                <p>Телефон: +7 (999) 123-45-67</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 MaxUltra. Все права защищены.</p>
+        </div>
+    </footer>
+</body>
+</html>
