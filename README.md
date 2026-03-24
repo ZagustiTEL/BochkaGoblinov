@@ -38,3 +38,5 @@
 
 - Адаптивный дизайн
 - Интуитивная навигация
+
+<img width="1239" height="680" alt="image" src="https://github.com/user-attachments/assets/e9e82922-d5bc-4a82-8762-22d0f1557398" />
