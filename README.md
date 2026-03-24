@@ -40,3 +40,7 @@
 - Интуитивная навигация
 
 <img width="1239" height="680" alt="image" src="https://github.com/user-attachments/assets/e9e82922-d5bc-4a82-8762-22d0f1557398" />
+
+Основное окно приложения 
+<img width="1226" height="886" alt="image" src="https://github.com/user-attachments/assets/5d8d5c2c-cfe1-44f4-a06a-3608ff72270a" />
+
