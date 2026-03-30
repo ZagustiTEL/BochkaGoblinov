@@ -32,14 +32,14 @@
 <body>
     <nav>
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="logo">MaxUltra</a>
+            <a href="{{ url_for('index') }}" class="logo">МаксУльтраПРО</a>
             <div class="nav-links">
                 {% if session.user_id %}
                     <a href="{{ url_for('profile') }}">Профиль</a>
                     <a href="{{ url_for('friends_list') }}">Друзья</a>
                     <a href="{{ url_for('chat') }}">Чаты</a>
                     <a href="{{ url_for('faq') }}">FAQ</a>
-                    <a href="{{ url_for('policy') }}">Соглашение</a>
+                    <a href="{{ url_for('policy') }}" target="_blank" class="policy-link">Пользовательского соглашения</a>
                     <a href="{{ url_for('logout') }}">Выйти</a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Войти</a>
